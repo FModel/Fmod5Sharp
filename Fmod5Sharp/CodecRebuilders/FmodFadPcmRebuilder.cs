@@ -26,12 +26,13 @@ public class FmodFadPcmRebuilder
         const int FrameSize = 0x8C;
         const int SamplesPerFrame = (FrameSize - 0x0C) * 2;
 
-        var sampleBytes = sample.SampleBytes;
+        ReadOnlySpan<byte> sampleBytes = sample.SampleBytes;
         int numChannels = sample.Metadata.NumChannels;
         int totalFrames = sampleBytes.Length / FrameSize;
 
         // Total samples across all channels
         short[] outputBuffer = new short[totalFrames * SamplesPerFrame];
+        Span<short> outputSpan = outputBuffer;
 
         int[] hist1 = new int[numChannels];
         int[] hist2 = new int[numChannels];
@@ -40,13 +41,16 @@ public class FmodFadPcmRebuilder
             int channel = f % numChannels;
             int frameOffset = f * FrameSize;
 
-            ReadOnlySpan<byte> frameSpan = sampleBytes.AsSpan(frameOffset, FrameSize);
+            ReadOnlySpan<byte> frameSpan = sampleBytes.Slice(frameOffset, FrameSize);
 
             // Parse Header
             uint coefsLookup = BinaryPrimitives.ReadUInt32LittleEndian(frameSpan[..4]);
             uint shiftsLookup = BinaryPrimitives.ReadUInt32LittleEndian(frameSpan[0x04..]);
             hist1[channel] = BinaryPrimitives.ReadInt16LittleEndian(frameSpan[0x08..]);
             hist2[channel] = BinaryPrimitives.ReadInt16LittleEndian(frameSpan[0x0A..]);
+
+            int frameIndexInChannel = f / numChannels;
+            int frameBaseOutIndex = (frameIndexInChannel * SamplesPerFrame * numChannels) + channel;
 
             // Decode nibbles, grouped in 8 sets of 0x10 * 0x04 * 2
             for (int i = 0; i < 8; i++)
@@ -71,13 +75,10 @@ public class FmodFadPcmRebuilder
 
                         short finalSample = Utils.ClampToShort(sampleValue);
 
-                        int frameIndexInChannel = f / numChannels;
-                        int outIndex = (frameIndexInChannel * SamplesPerFrame * numChannels) + ((i * 32 + j * 8 + k) * numChannels) + channel;
+                        int outIndex = frameBaseOutIndex + ((i * 32 + j * 8 + k) * numChannels);
 
-                        if (outIndex < outputBuffer.Length)
-                        {
-                            outputBuffer[outIndex] = finalSample;
-                        }
+                        if (outIndex < outputSpan.Length)
+                            outputSpan[outIndex] = finalSample;
 
                         hist2[channel] = hist1[channel];
                         hist1[channel] = finalSample;
