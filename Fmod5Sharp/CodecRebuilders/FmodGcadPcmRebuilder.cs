@@ -78,7 +78,7 @@ namespace Fmod5Sharp.CodecRebuilders
 
         public static byte[] Rebuild(FmodSample sample)
         {
-            var numChannels = sample.Metadata.IsStereo ? 2 : 1;
+            var numChannels = (int)sample.Metadata.Channels;
             var format = WaveFormat.CreateCustomFormat(
                 WaveFormatEncoding.Pcm,
                 sample.Metadata.Frequency,
