@@ -19,7 +19,7 @@
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/SamboyCoding/Fmod5Sharp.git</RepositoryUrl>
-        <TargetFrameworks>net6.0;netstandard2.0</TargetFrameworks>
+        <TargetFrameworks>net10.0;netstandard2.0</TargetFrameworks>
         <Title>FMOD5 Sharp</Title>
         <Version>3.0.1</Version>
         <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
