@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using Fmod5Sharp.FmodTypes;
 using Fmod5Sharp.Util;
@@ -25,6 +24,7 @@ namespace Fmod5Sharp
 
         private static FmodSoundBank? LoadInternal(Stream stream, bool throwIfError)
         {
+            var savedPos = stream.Position;
             using BinaryReader reader = new(stream);
 
             FmodAudioHeader header = new(reader);
@@ -37,7 +37,7 @@ namespace Fmod5Sharp
                 return null;
             }
 
-            long dataStartOffset = header.SizeOfThisHeader + header.SizeOfNameTable + header.SizeOfSampleHeaders;
+            long dataStartOffset = header.SizeOfThisHeader + header.SizeOfNameTable + header.SizeOfSampleHeaders + savedPos;
 
             List<FmodSample> samples = new(header.Samples.Count);
             for (var i = 0; i < header.Samples.Count; i++)
@@ -61,10 +61,10 @@ namespace Fmod5Sharp
                 if (header.SizeOfNameTable > 0)
                 {
                     var nameOffsetOffset = header.SizeOfThisHeader + header.SizeOfSampleHeaders + 4 * i;
-                    reader.BaseStream.Position = nameOffsetOffset;
-                    var nameOffset = reader.ReadUInt32();
+                    reader.BaseStream.Position = nameOffsetOffset + savedPos;
+                    var nameOffset = (long)reader.ReadUInt32();
 
-                    nameOffset += header.SizeOfThisHeader + header.SizeOfSampleHeaders;
+                    nameOffset += header.SizeOfThisHeader + header.SizeOfSampleHeaders + savedPos;
 
                     stream.Position = nameOffset;
                     sample.Name = stream.ReadNullTerminatedString();
