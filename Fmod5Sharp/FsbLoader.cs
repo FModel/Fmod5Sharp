@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using Fmod5Sharp.FmodTypes;
 using Fmod5Sharp.Util;
@@ -22,10 +21,10 @@ namespace Fmod5Sharp
             { 9, 48_000 },
             { 10, 96_000 },
         };
-        
-        private static FmodSoundBank? LoadInternal(byte[] bankBytes, bool throwIfError)
+
+        private static FmodSoundBank? LoadInternal(Stream stream, bool throwIfError)
         {
-            using MemoryStream stream = new(bankBytes);
+            var savedPos = stream.Position;
             using BinaryReader reader = new(stream);
 
             FmodAudioHeader header = new(reader);
@@ -38,34 +37,37 @@ namespace Fmod5Sharp
                 return null;
             }
 
-            List<FmodSample> samples = new();
+            long dataStartOffset = header.SizeOfThisHeader + header.SizeOfNameTable + header.SizeOfSampleHeaders + savedPos;
 
-            //Remove header from data block.
-            var bankData = bankBytes.AsSpan((int)(header.SizeOfThisHeader + header.SizeOfNameTable + header.SizeOfSampleHeaders));
-
+            List<FmodSample> samples = new(header.Samples.Count);
             for (var i = 0; i < header.Samples.Count; i++)
             {
                 var sampleMetadata = header.Samples[i];
 
-                var firstByteOfSample = (int)sampleMetadata.DataOffset;
-                var lastByteOfSample = (int)header.SizeOfData;
+                var firstByteOfSample = (long)sampleMetadata.DataOffset;
+                var lastByteOfSample = (long)header.SizeOfData;
 
                 if (i < header.Samples.Count - 1)
                 {
-                    lastByteOfSample = (int)header.Samples[i + 1].DataOffset;
+                    lastByteOfSample = (long)header.Samples[i + 1].DataOffset;
                 }
 
-                var sample = new FmodSample(sampleMetadata, bankData[firstByteOfSample..lastByteOfSample].ToArray());
+                byte[] sampleData = new byte[lastByteOfSample - firstByteOfSample];
+                stream.Position = dataStartOffset + firstByteOfSample;
+                stream.Read(sampleData, 0, sampleData.Length);
+
+                var sample = new FmodSample(sampleMetadata, sampleData);
 
                 if (header.SizeOfNameTable > 0)
                 {
                     var nameOffsetOffset = header.SizeOfThisHeader + header.SizeOfSampleHeaders + 4 * i;
-                    reader.BaseStream.Position = nameOffsetOffset;
-                    var nameOffset = reader.ReadUInt32();
+                    reader.BaseStream.Position = nameOffsetOffset + savedPos;
+                    var nameOffset = (long)reader.ReadUInt32();
 
-                    nameOffset += header.SizeOfThisHeader + header.SizeOfSampleHeaders;
+                    nameOffset += header.SizeOfThisHeader + header.SizeOfSampleHeaders + savedPos;
 
-                    sample.Name = bankBytes.ReadNullTerminatedString((int)nameOffset);
+                    stream.Position = nameOffset;
+                    sample.Name = stream.ReadNullTerminatedString();
                 }
 
                 samples.Add(sample);
@@ -74,13 +76,26 @@ namespace Fmod5Sharp
             return new FmodSoundBank(header, samples);
         }
 
+        public static bool TryLoadFsbFromStream(Stream stream, out FmodSoundBank? bank)
+        {
+            bank = LoadInternal(stream, false);
+            return bank != null;
+        }
+
+        public static FmodSoundBank LoadFsbFromStream(Stream stream)
+            => LoadInternal(stream, true)!;
+
         public static bool TryLoadFsbFromByteArray(byte[] bankBytes, out FmodSoundBank? bank)
         {
-            bank = LoadInternal(bankBytes, false);
+            using var stream = new MemoryStream(bankBytes);
+            bank = LoadInternal(stream, false);
             return bank != null;
         }
 
         public static FmodSoundBank LoadFsbFromByteArray(byte[] bankBytes)
-            => LoadInternal(bankBytes, true)!;
+        {
+            using var stream = new MemoryStream(bankBytes);
+            return LoadInternal(stream, true)!;
+        }
     }
 }
