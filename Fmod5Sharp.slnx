@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".github/workflows/build-test-publish.yml" />
+    <File Path=".gitignore" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="BankExtractor/BankExtractor.csproj" />
+  <Project Path="Fmod5Sharp.Tests/Fmod5Sharp.Tests.csproj" />
+  <Project Path="Fmod5Sharp/Fmod5Sharp.csproj" />
+  <Project Path="HeaderGenerator/HeaderGenerator.csproj" />
+</Solution>

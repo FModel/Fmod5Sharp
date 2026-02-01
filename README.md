@@ -1,7 +1,7 @@
 # Fmod5Sharp
 ## Managed decoder for FMOD 5 sound banks (FSB files).
 
-[![NuGet](https://img.shields.io/nuget/v/Fmod5Sharp?)](https://www.nuget.org/packages/Fmod5Sharp/)
+[![NuGet](https://img.shields.io/nuget/v/FModel.Fmod5Sharp?)](https://www.nuget.org/packages/FModel.Fmod5Sharp/)
 
 This library allows you to read FMOD 5 sound bank files (they start with the characters FSB5) into their contained samples,
 and then export those samples to standard file formats (assuming the contained data format is supported).
@@ -78,6 +78,3 @@ This project uses:
 - [OggVorbisEncoder](https://github.com/SteveLillis/.NET-Ogg-Vorbis-Encoder) to build Ogg Vorbis output streams.
 - [NAudio.Core](https://github.com/naudio/NAudio) to do the same thing but for WAV files.
 - [BitStreams](https://github.com/rubendal/BitStream) for parsing vorbis header data.
-- [IndexRange](https://github.com/bgrainger/IndexRange) to make my life easier when supporting .NET Standard 2.0.
-
-It also uses System.Text.Json.
