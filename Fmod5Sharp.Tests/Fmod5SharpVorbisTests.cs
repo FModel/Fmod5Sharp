@@ -13,7 +13,7 @@ namespace Fmod5Sharp.Tests
 
             var samples = FsbLoader.LoadFsbFromByteArray(rawData).Samples;
 
-            Assert.Single(samples, s => !s.Metadata.IsStereo && s.SampleBytes.Length > 0);
+            Assert.Single(samples, s => s.Metadata.Channels != 2 && s.SampleBytes.Length > 0);
         }
 
         [Fact]
