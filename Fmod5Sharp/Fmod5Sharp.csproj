@@ -1,41 +1,44 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <Authors>Sam Byass (Samboy063)</Authors>
-        <Configurations>Release;Debug</Configurations>
-        <DebugType>embedded</DebugType>
-        <Description>Decoder for FMOD 5 sound banks (FSB files)</Description>
-        <EmbedUntrackedSources>true</EmbedUntrackedSources>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <IsTrimmable>true</IsTrimmable>
-        <LangVersion>10</LangVersion>
-        <Nullable>enable</Nullable>
-        <PackageId>Fmod5Sharp</PackageId>
-        <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <PackageProjectUrl>https://github.com/SamboyCoding/Fmod5Sharp</PackageProjectUrl>
-        <PackageTags>fmod;audio</PackageTags>
-        <Platforms>x86;x64;AnyCPU</Platforms>
-        <PublishRepositoryUrl>true</PublishRepositoryUrl>
-        <RepositoryType>git</RepositoryType>
-        <RepositoryUrl>https://github.com/SamboyCoding/Fmod5Sharp.git</RepositoryUrl>
-        <TargetFrameworks>net10.0;netstandard2.0</TargetFrameworks>
-        <Title>FMOD5 Sharp</Title>
-        <Version>3.0.1</Version>
-        <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
-    </PropertyGroup>
+  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
-        <PackageReference Include="IndexRange" Version="1.0.2" />
-        <PackageReference Include="NAudio.Core" Version="2.1.0" />
-        <PackageReference Include="OggVorbisEncoder" Version="1.2.0" />
-        <PackageReference Include="System.Text.Json" Version="10.0.1" />
-    </ItemGroup>
+  <PropertyGroup>
+    <TargetFrameworks>net10.0</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <IsTrimmable>true</IsTrimmable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <Version>3.2.0</Version>
+    <PackageId>FModel.Fmod5Sharp</PackageId>
+    <PackageTags>fmod;audio</PackageTags>
+    <Title>FMOD5 Sharp</Title>
+    <Description>Decoder for FMOD 5 sound banks (FSB files)</Description>
+    <Copyright>Copyright © 2026 FModel</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <NeutralLanguage>en</NeutralLanguage>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <None Remove="FmodVorbis\vorbis_headers_converted.json" />
-        <EmbeddedResource Include="Util\vorbis_headers_converted.json" />
-    </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" Visible="false" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NAudio.Core" Version="2.2.1" />
+    <PackageReference Include="OggVorbisEncoder" Version="1.2.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="FmodVorbis\vorbis_headers_converted.json" />
+    <EmbeddedResource Include="Util\vorbis_headers_converted.json" />
+  </ItemGroup>
 
 </Project>
